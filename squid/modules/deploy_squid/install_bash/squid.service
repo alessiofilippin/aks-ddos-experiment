@@ -1,0 +1,8 @@
+[Unit]
+Description=Squid Web Proxy.
+[Service]
+Type=simple
+PIDFile=/var/run/squid.pid
+ExecStart=/usr/sbin/squid
+[Install]
+WantedBy=multi-user.target
