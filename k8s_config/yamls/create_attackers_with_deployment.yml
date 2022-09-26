@@ -37,7 +37,7 @@ spec:
           requests:
             memory: "10Mi"
             cpu: "10m"
-        args: ["BulkCall","https://alef-target-app.azurewebsites.net/", "20", "300", "http://51.137.116.196:3129"]
+        args: ["BulkCall","target_site_url", "20", "300", "global_load_balancer_url_and_squid_port"]
       tolerations:
       - key: "node.kubernetes.io/memory-pressure"
         operator: "Exists"

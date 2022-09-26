@@ -1,8 +1,3 @@
-locals {
-  target_url = "https://alef-target-app.azurewebsites.net/"
-  final_url = local.target_url == "" ? data.terraform_remote_state.target.app_endpoint_url : "https://alef-target-app.azurewebsites.net/"
-}
-
 resource "kubectl_manifest" "create_namespace" {
     yaml_body = <<YAML
 apiVersion: v1
@@ -12,33 +7,51 @@ metadata:
 YAML
 }
 
-resource "kubectl_manifest" "start_stress_batch_jobs" {
+resource "kubectl_manifest" "start_stress_deployment_jobs" {
     yaml_body = <<YAML
-apiVersion: batch/v1
-kind: Job
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   namespace: attack-ns
-  name: attack-batch-job
+  name: attack-deployment
   labels:
-    app: attack-batch-job
+    app: attack-deployment
 spec:
-  parallelism: ${var.k8s_job_parallelism}
-  completions: ${var.k8s_job_parallelism}
+  replicas: 50
+  selector:
+    matchLabels:
+      app: attack-deployment
   template:
+    metadata:
+      labels:
+        app: attack-deployment
     spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: attack-deployment
       containers:
       - name: attack-box
         image: alessiofilippin/just-another-boring-crawler-cli
         resources:
           limits:
-            memory: "150Mi"
+            memory: "250Mi"
             cpu: "200m"
-        args: ["BulkCall","${local.final_url}", "${var.number_of_threads}", "${var.duration_seconds}"]
+          requests:
+            memory: "10Mi"
+            cpu: "10m"
+        args: ["BulkCall","${data.terraform_remote_state.target.outputs.app_endpoint_url}", "${var.number_of_threads}", "${var.duration_seconds}", "http://${data.terraform_remote_state.squid.outputs.global_lb_ip}:3129"]
       tolerations:
       - key: "node.kubernetes.io/memory-pressure"
         operator: "Exists"
         effect: "NoSchedule"
-      restartPolicy: Never
-  backoffLimit: 4
+      restartPolicy: Always
 YAML
+
+  depends_on = [
+    kubectl_manifest.create_namespace
+  ]
 }

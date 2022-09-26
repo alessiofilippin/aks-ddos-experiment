@@ -28,6 +28,16 @@ data "terraform_remote_state" "eks_infra" {
   }
 }
 
+data "terraform_remote_state" "squid" {
+  backend = "azurerm"
+  config = {
+    resource_group_name  = "tfstate-ddos-exp-rg"
+    storage_account_name = "tfstatestoreddosexp"
+    container_name       = "tf-state"
+    key                  = "tf-squids.tfstate"
+  }
+}
+
 data "terraform_remote_state" "target" {
   backend = "azurerm"
   config = {
