@@ -43,7 +43,7 @@ spec:
           requests:
             memory: "10Mi"
             cpu: "10m"
-        args: ["BulkCall","${data.terraform_remote_state.target.outputs.app_endpoint_url}", "${var.number_of_threads}", "${var.duration_seconds}", "http://${data.terraform_remote_state.squid.outputs.global_lb_ip}:3129"]
+        args: ["BulkCall","https://${data.terraform_remote_state.target.outputs.app_endpoint_url}", "${var.number_of_threads}", "${var.duration_seconds}", "http://${data.terraform_remote_state.squid.outputs.global_lb_ip}:3129"]
       tolerations:
       - key: "node.kubernetes.io/memory-pressure"
         operator: "Exists"

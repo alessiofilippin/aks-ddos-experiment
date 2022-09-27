@@ -118,4 +118,56 @@ Also, I'm using a **topologySpreadConstraints** to evenly spread the pods betwee
 
 Feel free to play with the values yourself.
 
+to stop the test:
+
+- Open a cmd or powershell.
+- cd into the **k8s_config** folder.
+- Terraform **destroy**
+
 ## 6) Review Results
+
+we can use AppInsight live metrics and LogAnalytics logs to measure the effects of our attack. we are expecting to see:
+
+- An Increase in response latency.
+- An Increase in reqs/s.
+- Different attacker's IPs.
+- Possibly halt the website.
+
+> Keep in mind that it will be hard to halt the target app because it's an empty webserver which it does return 404 all the time. It will be easier to halt a real website due to a lot of elements loading on the page: images, JavaScript, Dependecies, HTML ecc..
+
+
+**Starting Point**
+
+Open LiveMetrics in AppInsight to get an idea of the starting situation. The graphs should look quite flat.
+
+![start_point](docs/images/metrics_start.PNG)
+
+
+At this point - Just start the stress test as explained in step 5 and check again.
+
+**During DDoS**
+
+LiveMetrics should show a completely different situation now.
+
+![end_point](docs/images/metrics_end.PNG)
+
+You can use this simple KUSTO query in LogAnalytic to get a list of all the source IPs used for the requests:
+
+``AppServiceHTTPLogs
+| summarize count() by CIp``
+
+You should see one or more IPs corresponding to the Squid Proxy public IPs.
+
+# Final Thought
+
+I hope that this little experiment was fun to execute for you. I would say that it's definitely possible to leverage AKS and Azure to create some sort of DDoS attack.
+
+The result shows a neat increase in latency and reqs/s. Due to the nature of the experiment, I couldn't use a real website but you might expect a real website to be affected much more by this as a real website will have some heavy content to load and dependencies to call at each request.
+
+Possible improvements for the future?
+
+- Test with multiple AKS cluster in different region.
+- Upload a real website to Jetty or different WebServer.
+- Improve the DDoS application to support multiple root URLs to call and maybe delayed start for each request (this would make the attack more random and hard to catch).
+
+Thank you! and Bye ;)
