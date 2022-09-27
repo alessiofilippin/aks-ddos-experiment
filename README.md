@@ -110,7 +110,7 @@ we will be running the DDoS using Terraform. the folder "k8s_config" contains th
 - Open a cmd or powershell.
 - cd into the **k8s_config** folder.
 - Terraform **init**
-- Terraform **apply -var="name_prefix=pick_your_prefix"**
+- Terraform **apply**
 
 The attack will be performed using a deployment. I found out that 50 replicas and 20 threads (set in the container App) are good values to fill the CPU of the Workers.
 
@@ -140,7 +140,7 @@ we can use AppInsight live metrics and LogAnalytics logs to measure the effects 
 
 Open LiveMetrics in AppInsight to get an idea of the starting situation. The graphs should look quite flat.
 
-![start_point](docs/images/metrics_start.PNG)
+![start_point](docs/images/metrics_start.png)
 
 
 At this point - Just start the stress test as explained in step 5 and check again.
@@ -149,7 +149,7 @@ At this point - Just start the stress test as explained in step 5 and check agai
 
 LiveMetrics should show a completely different situation now.
 
-![end_point](docs/images/metrics_end.PNG)
+![end_point](docs/images/metrics_end.png)
 
 You can use this simple KUSTO query in LogAnalytic to get a list of all the source IPs used for the requests:
 
